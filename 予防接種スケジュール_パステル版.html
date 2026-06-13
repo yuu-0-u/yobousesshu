@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>予防接種スケジュール表（パステル版）</title>
+<style>
+body{font-family:sans-serif;background:#fffafc;max-width:1100px;margin:auto;padding:20px}
+.card{background:white;border-radius:18px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+h1{background:#dff4ff;padding:14px;border-radius:12px}
+input,button{padding:10px;margin:4px;border-radius:8px;border:1px solid #ccc}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{border:1px solid #ddd;padding:8px}
+th{background:#f7f7f7}
+.infant{background:#e8f6ff}
+.toddler{background:#ffeaf4}
+.child{background:#ecffe9}
+.older{background:#f2eaff}
+.legend span{display:inline-block;padding:6px 10px;border-radius:8px;margin-right:8px}
+@media print{button{display:none} .card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🌸 予防接種スケジュール表 🌸</h1>
+
+<label>氏名：</label><input id="name">
+<label>生年月日：</label><input type="date" id="birth">
+<button onclick="createSchedule()">予定表を作成</button>
+<button onclick="window.print()">印刷</button>
+
+<div class="legend" style="margin-top:12px">
+<span class="infant">🩵 生後～1歳未満</span>
+<span class="toddler">🩷 1～2歳</span>
+<span class="child">💚 3～5歳</span>
+<span class="older">💜 9歳頃</span>
+</div>
+
+<div id="output"></div>
+</div>
+
+<script>
+function addMonths(d,m){let x=new Date(d);x.setMonth(x.getMonth()+m);return x;}
+function addYears(d,y){let x=new Date(d);x.setFullYear(x.getFullYear()+y);return x;}
+function addDays(d,n){let x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function fmt(d){return d.toLocaleDateString('ja-JP');}
+
+function cls(age){
+ if(age<12) return "infant";
+ if(age<36) return "toddler";
+ if(age<72) return "child";
+ return "older";
+}
+
+function createSchedule(){
+ const birth=new Date(document.getElementById("birth").value);
+ if(isNaN(birth)){alert("生年月日を入力してください");return;}
+ const name=document.getElementById("name").value||"未入力";
+
+ let j1=addYears(birth,3);
+
+ let data=[
+ ["ロタ1回目",addMonths(birth,2),2],["肺炎球菌1回目",addMonths(birth,2),2],
+ ["B型肝炎1回目",addMonths(birth,2),2],["五種混合1回目",addMonths(birth,2),2],
+ ["ロタ2回目",addMonths(birth,3),3],["肺炎球菌2回目",addMonths(birth,3),3],
+ ["B型肝炎2回目",addMonths(birth,3),3],["五種混合2回目",addMonths(birth,3),3],
+ ["肺炎球菌3回目",addMonths(birth,4),4],["五種混合3回目",addMonths(birth,4),4],
+ ["BCG",addMonths(birth,5),5],
+ ["MR1回目",addYears(birth,1),12],["水ぼうそう1回目",addYears(birth,1),12],
+ ["おたふくかぜ1回目",addYears(birth,1),12],["肺炎球菌4回目",addYears(birth,1),12],
+ ["水ぼうそう2回目",addMonths(birth,18),18],["五種混合4回目",addMonths(birth,18),18],
+ ["日本脳炎1回目",j1,36],["日本脳炎2回目",addDays(j1,14),36],
+ ["日本脳炎3回目",addYears(birth,4),48],
+ ["MR2回目",addYears(birth,5),60],["おたふくかぜ2回目",addYears(birth,5),60],
+ ["日本脳炎4回目",addYears(birth,9),108]
+ ];
+ data.sort((a,b)=>a[1]-b[1]);
+
+ let out=`<h2>${name} さんの予定表</h2>
+ <p>生年月日：${fmt(birth)}</p>
+ <table><tr><th>接種済</th><th>接種名</th><th>予定日</th></tr>`;
+
+ data.forEach(r=>{
+   out += `<tr class="${cls(r[2])}"><td>□</td><td>${r[0]}</td><td>${fmt(r[1])}</td></tr>`;
+ });
+
+ out += "</table>";
+ document.getElementById("output").innerHTML=out;
+}
+</script>
+</body>
+</html>
